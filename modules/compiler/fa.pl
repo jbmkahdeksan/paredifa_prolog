@@ -1,4 +1,5 @@
-:- module(fa, [json_to_fa/2, fa_to_json/2]).
+:- module(fa, [json_to_fa/2, fa_to_json/2, 
+               fa_new_id/1, state_new_id/1]).
 :- [opers].
 
 /*
@@ -16,6 +17,8 @@ A model for FA using predicates
 fa_new_id(Id) :- gensym('$fa_', Id).
 
 %%%%%%%%%%%%%%%%%%%%% STATES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+state_new_id(Id) :- gensym('s', Id).
+
 fa_set_states(FA, S) :-
     fa_insert_state_once(FA, S).
 

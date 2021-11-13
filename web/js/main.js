@@ -1,5 +1,5 @@
 
-const SERVICE_URL = 'http://localhost:9000/parser';
+const SERVICE_URL = 'http://localhost:9000/compiler';
 
 const binding = (btn, input, out) => {
     
@@ -11,7 +11,15 @@ const binding = (btn, input, out) => {
                 body: JSON.stringify(obj)
             })
              .then(resp => resp.json())
-             .then(json => {console.log(json);  out.innerHTML += `\n árbol: ${json.tree} --> en post-orden ${json.trail}\n`})
+             .then(json => {console.log(json);  out.innerHTML += `\n árbol: ${json.tree} --> en post-orden: ${json.trail}\n
+                FA = {
+                    id: ${json.fa.id},
+                    vocabulary: ${json.fa.vocabulary},
+                    states: ${json.fa.states},
+                    initial: ${json.fa.initial},
+                    finals: ${json.fa.finals},                                                                        
+                    moves: ${json.fa.moves}
+                }\n`})
              .catch(e => out.innerHTML += `\n*** ${e} ***`)
     }
     btn.addEventListener("click", onclick)

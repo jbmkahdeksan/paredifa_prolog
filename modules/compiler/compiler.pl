@@ -1,5 +1,5 @@
 :- module(compiler, [begin_compile/2, postOrder/2]).
-:- use_module(fa, [json_to_fa/2, fa_to_json/2]).
+:- use_module(fa, [json_to_fa/2, fa_to_json/2, state_new_id/1, fa_new_id/1]).
 :- [opers].
 
 /*
@@ -13,19 +13,42 @@
 */
 
 begin_compile(Input, FA) :-
-    postOrder(Input, FA).
+    postOrder(Input, Post),
+    maplist(to_fa, Post, [FA]).
 
 
-fa_atomic().
+to_fa(Token, FA) :-
+    atom(Token), !,
+    fa_atomic(Token, FA).
 
-%%%% ^ handler %%%%%
-fa_concat().
+to_fa(Oper, Oper). 
 
-%%%% | handler %%%%%
-fa_union().
 
-%%%% +,*,? handler %%%%%
-fa_kleene().
+fa_atomic(Atomic, FA) :-
+    fa_new_id(Id),
+    state_new_id(S0),
+    state_new_id(S1),
+    format(atom(Move), '~w/~w==>~w',[S0,Atomic,S1]),
+    FA = fa{
+        id:Id, 
+        vocabulary:[Atomic], 
+        states:[S0, S1], 
+        initial:S0, finals:[S1],
+        moves:[Move]
+    }
+
+. 
+
+% %%%% ^ handler %%%%%
+% fa_concat(One, Two, FA).
+
+% %%%% | handler %%%%%
+% fa_union(One, Two, FA).
+
+% %%%% +,*,? handler %%%%%
+% fa_plus(FA, Plusified).
+% fa_star(FA, Stared).
+% fa_hook(FA, Hooked).
 
 
 

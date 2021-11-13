@@ -31,7 +31,7 @@ mime:mime_extension('js', 'application/javascript').
     atom_number(SPort, Port), 
     server(Port).
 
-:- http_handler('/parser', parser, []).
+:- http_handler('/compiler', compile, []).
 :- http_handler(web(.), serve_files, [prefix]).
 
 server(Port) :-
@@ -42,17 +42,20 @@ serve_files(Request) :-
 serve_files(Request) :-
     http_404([], Request).  
 
-parser(Request) :-  
+compile(Request) :-  
+    reset_gensym,
     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
     Value = Data.value,
     begin_parse(Value, Tree),
 
-    postOrder(Tree, FA),
+    postOrder(Tree, Post),
+    begin_compile(Tree, FA),
     term_to_atom(Tree, Atom),
     
     Output = json{
         tree:  [Atom],
-        trail: FA
+        trail: Post,
+        fa: FA
     },
 
     % format(atom(Resp), '{
