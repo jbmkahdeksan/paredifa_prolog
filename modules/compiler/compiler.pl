@@ -1,17 +1,22 @@
 :- module(compiler, [begin_compile/2, postOrder/2]).
+
+:- [opers].
 :- use_module(fa, [json_to_fa/2, fa_to_json/2, 
                    state_new_id/1, fa_new_id/1]).
+
 :- use_module(postorder, [postOrder/2]).
 :- use_module(utils(stack), [
     new_stack/1, is_empty/1, 
     top_stack/2, push_stack/2,
     size/2, pop_stack/2
 ]).
+
 :- use_module(utils(extra_basics), [isDigit/1, isLetter/1]).
-:- [opers].
+
 
 
 begin_compile(Input, NFA) :-
+    op(650, xfx, '==>'),
     reset_gensym('$fa_'), reset_gensym('s'),
     new_stack(Stack),
     postOrder(Input, Post),
@@ -112,10 +117,18 @@ fa_union(Stack) :-
     pop_stack(Stack, B),
     pop_stack(Stack, A),
     fa_new_id(Id),
+
     union(A.vocabulary,B.vocabulary, Vocab),
-    append(A.states, B.states, States),
+
+    exclude([State] >> member(State, [B.initial]), B.states, NewB),
+    append(A.states, NewB, States),
+
+    maplist([M, Out] >> (initial_union_handler(B, M, A, Out)),
+                         B.moves, MovesB),
+
+    append(A.moves, MovesB, Moves),
     append(A.finals, B.finals, Finals),
-    append(A.moves, B.moves, Moves),
+
     Union = union{
       id:Id,
       vocabulary: Vocab,
@@ -129,18 +142,77 @@ fa_union(Stack) :-
 
 
 % %%%% +,*,? handler %%%%%
-% fa_plus(Stack).
-% fa_star(Stack).
-% fa_hook(Stack).
+fa_plus(Stack):-
+    pop_stack(Stack, A),
+    fa_new_id(Id),
+    
+    include([Move]>>(atom_to_term(Move, X/_==>_,_), member(X, [A.initial])), A.moves, Pivot),   
+    maplist([Move, Y]>>(atom_to_term(Move, _/Y==>_,_)), Pivot, Ys),
+    maplist([Move, Z]>>(atom_to_term(Move, _/_==>Z,_)), Pivot, Zs),
 
+    findall(Loop, (member(Y, Ys), member(Z, Zs), member(Final, A.finals), 
+                   format(atom(Loop),'~w/~w==>~w',[Final, Y, Z])), Loops),
+
+    append(A.moves, Loops, Moves),
+    list_to_set(Moves, MovesSet),
+
+    Plus = plus{
+        id:Id,
+        vocabulary: A.vocabulary,
+        states: A.states,
+        initial:A.initial, finals: A.finals,
+        moves: MovesSet
+    },
+    push_stack(Stack, Plus).
+
+fa_hook(Stack) :-
+    pop_stack(Stack, A),
+    fa_new_id(Id),
+    append([A.initial], A.finals, Finals),
+    Hook = hook{
+      id:Id,
+      vocabulary: A.vocabulary,
+      states: A.states,
+      initial:A.initial, finals: Finals,
+      moves: A.moves
+    },
+    push_stack(Stack, Hook).
+
+fa_star(Stack):-
+    fa_plus(Stack),
+    fa_hook(Stack),
+    pop_stack(Stack, A),
+    fa_new_id(Id),
+    Star = star{
+        id:Id,
+        vocabulary: A.vocabulary,
+        states: A.states,
+        initial:A.initial, finals: A.finals,
+        moves: A.moves
+    },
+    push_stack(Stack, Star).
+
+
+
+%%%%%%%%  FA Operations %%%%%%%%%
 final_concat_handler(A, M, B, Out) :-
-    op(650, xfx, '==>'),
-    atom_to_term(M, X/Y ==> Z, _),  %  Not working!
+    atom_to_term(M, X/Y ==> Z, _), 
     member(Z, A.finals), !,
-    format(atom(Out), '~w/~w==>~w',[X,Y,B.initial])
-    .
-
+    format(atom(Out), '~w/~w==>~w',[X,Y,B.initial]).
 final_concat_handler(_, M, _, M).
+
+
+initial_union_handler(B, M, A, Out) :-
+    atom_to_term(M, X/Y ==> Z, _), 
+    member(X, [B.initial]), !,
+    format(atom(Out), '~w/~w==>~w',[A.initial,Y,Z]).
+initial_union_handler(_, M, _, M).
+
+
+% loop_handler(A, M, Out) :-
+%     atom_to_term(M, X/Y ==> Z, _), 
+%     member(X, [A.initial]), !,
+%     format(atom(Out), '~w/~w==>~w',[Z,Y,Z]).
     
 
 

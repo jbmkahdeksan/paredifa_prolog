@@ -28,7 +28,7 @@ mime:mime_extension('js', 'application/javascript').
 
 :- initialization
     (current_prolog_flag(argv, [SPort | _]) -> true; SPort='9000'),
-    atom_number(SPort, Port),    
+    atom_number(SPort, Port), 
     server(Port).
 
 :- http_handler('/compiler', compile, []).
