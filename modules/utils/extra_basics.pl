@@ -8,7 +8,8 @@
     id/3,
     numeric/3,
     isCodeLetterOrDigit/1,
-	isCodePipe/1
+	isCodePipe/1,
+    isDigit/1, isLetter/1
 ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PUBLIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

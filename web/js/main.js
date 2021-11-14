@@ -11,7 +11,7 @@ const binding = (btn, input, out) => {
                 body: JSON.stringify(obj)
             })
              .then(resp => resp.json())
-             .then(json => {console.log(json);  out.innerHTML += `\n árbol: ${json.tree} --> en post-orden: ${json.trail}\n
+             .then(json => {console.log(json);  out.innerHTML += `\n árbol: ${json.tree} --> en post-orden: ${json.trail} --> ${json.fa}\n
                 FA = {
                     id: ${json.fa.id},
                     vocabulary: ${json.fa.vocabulary},

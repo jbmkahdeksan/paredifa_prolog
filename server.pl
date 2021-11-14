@@ -28,7 +28,7 @@ mime:mime_extension('js', 'application/javascript').
 
 :- initialization
     (current_prolog_flag(argv, [SPort | _]) -> true; SPort='9000'),
-    atom_number(SPort, Port), 
+    atom_number(SPort, Port),    
     server(Port).
 
 :- http_handler('/compiler', compile, []).
@@ -43,7 +43,6 @@ serve_files(Request) :-
     http_404([], Request).  
 
 compile(Request) :-  
-    reset_gensym,
     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
     Value = Data.value,
     begin_parse(Value, Tree),

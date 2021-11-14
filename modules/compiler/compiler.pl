@@ -7,45 +7,60 @@
     top_stack/2, push_stack/2,
     size/2, pop_stack/2
 ]).
+:- use_module(utils(extra_basics), [isDigit/1, isLetter/1]).
 :- [opers].
 
 
 begin_compile(Input, NFA) :-
+    reset_gensym('$fa_'), reset_gensym('s'),
     new_stack(Stack),
     postOrder(Input, Post),
     maplist(to_fa, Post, FA),
-    forall(member(F, FA), fa_handler(Stack, F, NFA)).
+    forall(member(F, FA), fa_handler(Stack, F)),
+    pop_stack(Stack, NFA)
+    .
 
 
 %%%%%%%%%% MAPPER %%%%%%%%%%
 to_fa(Token, FA) :-
-    atom(Token), !,
+    isDigit(Token), !,
     fa_atomic(Token, FA).
+
+to_fa(Token, FA) :-
+    isLetter(Token), !,
+    fa_atomic(Token, FA).
+
 to_fa(Oper, Oper).
 
 
 %%%%%%%% HANDLER %%%%%%%%%%%
-fa_handler(Stack, A, Out) :-
-    infix(A), !, fa_infix(Stack, Out).
+fa_handler(Stack, A) :-
+    infix(A), !, fa_infix(Stack, A).
 
-fa_handler(Stack, A, Out) :-
-    postfix(A), !, fa_postfix(Stack, Out).
+fa_handler(Stack, A) :-
+    postfix(A), !, fa_postfix(Stack, A).
 
-fa_handler(Stack, A, _) :-
+fa_handler(Stack, A) :-
     push_stack(Stack, A).
 
 
-
 %%%%%%%%%%% Infix Handler %%%%%%%%%%%
-fa_infix(Stack, '|', Union) :-
-    pop_stack(Stack, A),
-    pop_stack(Stack, B),
-    fa_union(A, B, Union).
+fa_infix(Stack, '|') :-
+    fa_union(Stack).
 
-fa_infix(Stack, '^', Concat) :-
-    pop_stack(Stack, A),
-    pop_stack(Stack, B),
-    fa_concat(A, B, Concat).
+fa_infix(Stack, '^') :-
+    fa_concat(Stack).
+
+%%%%%%%%%%% Postfix Handler %%%%%%%%%%%
+fa_postfix(Stack, '+') :-
+    fa_plus(Stack).
+
+fa_postfix(Stack, '*') :-
+    fa_star(Stack).
+
+fa_postfix(Stack, '?') :-
+    fa_hook(Stack).
+
 
 
 
@@ -62,27 +77,40 @@ fa_atomic(Atomic, FA) :-
         states:[S0, S1], 
         initial:S0, finals:[S1],
         moves:[Move]
-    },
-    push_stack(Union)
+    }
 . 
 
-% %%%% ^ handler %%%%%
-% fa_concat(A, B, Concat) :-
-%     fa_new_id(Id),
-%     union(A.vocabulary,B.vocabulary, Vocab),
-%     append(A.states, B.states, States),
-%     exclude()
-%     Concat = concat{
-%       id:Id,
-%       vocabulary: Vocab,
-%       states: States,
-%       initial: A.initial, finals: B.finals,
-%       moves: 
-%     }
-%.
 
-%%%% | handler %%%%%
-fa_union(A, B, Union) :-
+%%% Concat handler %%%%%
+fa_concat(Stack) :-
+    pop_stack(Stack, B),
+    pop_stack(Stack, A),
+    fa_new_id(Id),
+
+    union(A.vocabulary,B.vocabulary, Vocab),
+
+    exclude([State] >> member(State, A.finals), A.states, NewA),
+    append(NewA, B.states, States),
+
+    maplist([M, Out] >> (final_concat_handler(A, M, B, Out)),
+                        A.moves, MovesA),
+    append(MovesA, B.moves, Moves),
+
+    Concat = concat{
+      id:Id,
+      vocabulary: Vocab,
+      states: States,
+      initial:A.initial, finals: B.finals,
+      moves: Moves
+    },
+    push_stack(Stack, Concat)
+    .
+
+
+%%%% Union handler %%%%%
+fa_union(Stack) :-
+    pop_stack(Stack, B),
+    pop_stack(Stack, A),
     fa_new_id(Id),
     union(A.vocabulary,B.vocabulary, Vocab),
     append(A.states, B.states, States),
@@ -94,15 +122,28 @@ fa_union(A, B, Union) :-
       states: States,
       initial:A.initial, finals: Finals,
       moves: Moves
-    }
+    },
+    push_stack(Stack, Union)
     .
 
 
 
 % %%%% +,*,? handler %%%%%
-% fa_plus(FA, Plusified).
-% fa_star(FA, Stared).
-% fa_hook(FA, Hooked).
+% fa_plus(Stack).
+% fa_star(Stack).
+% fa_hook(Stack).
+
+final_concat_handler(A, M, B, Out) :-
+    op(650, xfx, '==>'),
+    atom_to_term(M, X/Y ==> Z, _),  %  Not working!
+    member(Z, A.finals), !,
+    format(atom(Out), '~w/~w==>~w',[X,Y,B.initial])
+    .
+
+final_concat_handler(_, M, _, M).
+    
+
+
 
 
 
