@@ -179,16 +179,26 @@ fa_hook(Stack) :-
     push_stack(Stack, Hook).
 
 fa_star(Stack):-
-    fa_plus(Stack),
     fa_hook(Stack),
-    pop_stack(Stack, A),
     fa_new_id(Id),
+    pop_stack(Stack, A),   
+
+    include([Move]>>(atom_to_term(Move, X/_==>_,_), member(X, [A.initial])), A.moves, Pivot),   
+    maplist([Move, Y]>>(atom_to_term(Move, _/Y==>_,_)), Pivot, Ys),
+    maplist([Move, Z]>>(atom_to_term(Move, _/_==>Z,_)), Pivot, Zs),
+
+    subtract(A.finals, [A.initial], Finals),
+    findall(Loop, (member(Y, Ys), member(Z, Zs), member(Final, Finals), 
+                   format(atom(Loop),'~w/~w==>~w',[Final, Y, Z])), Loops),
+
+    append(A.moves, Loops, Moves),
+    list_to_set(Moves, MovesSet),
     Star = star{
         id:Id,
         vocabulary: A.vocabulary,
         states: A.states,
         initial:A.initial, finals: A.finals,
-        moves: A.moves
+        moves: MovesSet
     },
     push_stack(Stack, Star).
 
