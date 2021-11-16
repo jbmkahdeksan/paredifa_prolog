@@ -1,10 +1,10 @@
 :- module(compiler, [begin_compile/2, postOrder/2]).
 
 :- [opers].
-:- use_module(fa, [json_to_fa/2, fa_to_json/2, 
-                   state_new_id/1, fa_new_id/1]).
+:- use_module(fa, [state_new_id/1, fa_new_id/1]).
 
 :- use_module(postorder, [postOrder/2]).
+:- use_module(to_dfa, [convert/2]).
 :- use_module(utils(stack), [
     new_stack/1, is_empty/1, 
     top_stack/2, push_stack/2,
@@ -23,6 +23,7 @@ begin_compile(Input, NFA) :-
     maplist(to_fa, Post, FA),
     forall(member(F, FA), fa_handler(Stack, F)),
     pop_stack(Stack, NFA)
+    %convert(NFA, DFA)
     .
 
 
@@ -92,14 +93,26 @@ fa_concat(Stack) :-
     pop_stack(Stack, A),
     fa_new_id(Id),
 
-    union(A.vocabulary,B.vocabulary, Vocab),
+    union(A.vocabulary, B.vocabulary, Vocab),
 
-    exclude([State] >> member(State, A.finals), A.states, NewA),
-    append(NewA, B.states, States),
+    subtract(B.states, [B.initial], NewB),
+    append(A.states, NewB, States),   
 
-    maplist([M, Out] >> (final_concat_handler(A, M, B, Out)),
-                        A.moves, MovesA),
-    append(MovesA, B.moves, Moves),
+    findall(M, (member(M, B.moves), final_concat_handler(B, M)), PostInitials),
+
+    subtract(B.moves, PostInitials, MovesB),
+    maplist([M, Z] >> (atom_to_term(M, _/_==>Z, _)), PostInitials, PostStates),
+    
+
+    findall(Move, (member(Z, PostStates), 
+                   member(X, A.finals), 
+                   member(Y, B.vocabulary),
+                   format(atom(Move), '~w/~w==>~w', [X, Y, Z])), 
+                   MovesA),
+
+    append(A.moves, MovesA, Connect),
+
+    append(Connect, MovesB, Moves),
 
     Concat = concat{
       id:Id,
@@ -150,7 +163,9 @@ fa_plus(Stack):-
     maplist([Move, Y]>>(atom_to_term(Move, _/Y==>_,_)), Pivot, Ys),
     maplist([Move, Z]>>(atom_to_term(Move, _/_==>Z,_)), Pivot, Zs),
 
-    findall(Loop, (member(Y, Ys), member(Z, Zs), member(Final, A.finals), 
+    subtract(A.finals, [A.initial], Finals),
+
+    findall(Loop, (member(Y, Ys), member(Z, Zs), member(Final, Finals), 
                    format(atom(Loop),'~w/~w==>~w',[Final, Y, Z])), Loops),
 
     append(A.moves, Loops, Moves),
@@ -180,36 +195,25 @@ fa_hook(Stack) :-
 
 fa_star(Stack):-
     fa_hook(Stack),
+    fa_plus(Stack),
     fa_new_id(Id),
     pop_stack(Stack, A),   
 
-    include([Move]>>(atom_to_term(Move, X/_==>_,_), member(X, [A.initial])), A.moves, Pivot),   
-    maplist([Move, Y]>>(atom_to_term(Move, _/Y==>_,_)), Pivot, Ys),
-    maplist([Move, Z]>>(atom_to_term(Move, _/_==>Z,_)), Pivot, Zs),
-
-    subtract(A.finals, [A.initial], Finals),
-    findall(Loop, (member(Y, Ys), member(Z, Zs), member(Final, Finals), 
-                   format(atom(Loop),'~w/~w==>~w',[Final, Y, Z])), Loops),
-
-    append(A.moves, Loops, Moves),
-    list_to_set(Moves, MovesSet),
     Star = star{
         id:Id,
         vocabulary: A.vocabulary,
         states: A.states,
         initial:A.initial, finals: A.finals,
-        moves: MovesSet
+        moves: A.moves
     },
     push_stack(Stack, Star).
 
 
 
 %%%%%%%%  FA Operations %%%%%%%%%
-final_concat_handler(A, M, B, Out) :-
-    atom_to_term(M, X/Y ==> Z, _), 
-    member(Z, A.finals), !,
-    format(atom(Out), '~w/~w==>~w',[X,Y,B.initial]).
-final_concat_handler(_, M, _, M).
+final_concat_handler(B, M) :-
+    atom_to_term(M, X/_ ==> _, _), 
+    member(X, [B.initial]).
 
 
 initial_union_handler(B, M, A, Out) :-
@@ -219,11 +223,6 @@ initial_union_handler(B, M, A, Out) :-
 initial_union_handler(_, M, _, M).
 
 
-% loop_handler(A, M, Out) :-
-%     atom_to_term(M, X/Y ==> Z, _), 
-%     member(X, [A.initial]), !,
-%     format(atom(Out), '~w/~w==>~w',[Z,Y,Z]).
-    
 
 
 

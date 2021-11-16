@@ -1,5 +1,8 @@
 :- module(fa, [json_to_fa/2, fa_to_json/2, 
-               fa_new_id/1, state_new_id/1]).
+               fa_new_id/1, state_new_id/1,
+               fa_initial/2, fa_finals/2, 
+               fa_states/2, fa_moves/2, 
+               fa_vocab/2, search_move/4]).
 :- [opers].
 
 /*
@@ -79,6 +82,10 @@ fa_vocab(FA, L) :-
 fa_moves(FA, L) :-
     findall(X/S==>Y, dyn_fa_moves(FA, X, S, Y), L).
 
+search_move(FA, X, Y, Z) :-
+    fa_moves(FA, L),
+    member(X/Y==>Z, L).
+
 %%%%%%%%%%%%%%%%%%% TRANSFORMERS %%%%%%%%%%%%%%%%%%%%%%%%
 
 json_to_fa(JsonDict, FA) :- 
@@ -93,7 +100,7 @@ json_to_fa(JsonDict, FA) :-
     fa_set_initial(FA, S0),
     forall(member(S, States), fa_set_states(FA, S)),
     forall(member(F, Finals), fa_set_finals(FA, F)),
-    forall(member(M, Moves), fa_set_moves(FA, M)),   
+    forall(member(M, Moves), (atom_to_term(M, T, _), fa_set_moves(FA, T))),   
     forall(member(V, Vocab), fa_set_vocab(FA, V))     
 . 
 

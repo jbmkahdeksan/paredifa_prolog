@@ -4,21 +4,20 @@
 %%%% POST-ORDER %%%%%
 
 postOrder(Expr, Output) :- 
-    postOrder(Expr, [], Post), 
-    flatten(Post, Output).
+    postOrder(Expr, [], Output).
 
 %%% 'Atomic-values' handler %%%%
-postOrder(Expr, Acc, [Acc | Expr]) :-
+postOrder(Expr, Acc, [Expr | Acc]) :-
     atom(Expr);number(Expr), !.
 
 %%% IN-FIX Operators handler %%%%    
-postOrder(Expr, Acc, [PostLR | Oper]) :-
+postOrder(Expr, Acc, PostLR) :-
     Expr=..[Oper, Left, Right],
     infix(Oper), !,
-    postOrder(Left, Acc, PostLeft), 
-    postOrder(Right, PostLeft, PostLR).
+    postOrder(Right, [Oper | Acc], PostRight), 
+    postOrder(Left, PostRight, PostLR).
 
 %%% POST-FIX Operators handler %%%%
-postOrder(Expr, Acc, [PostLeft | Oper]) :-
+postOrder(Expr, Acc, PostLeft) :-
     Expr=..[Oper, Left],
-    postOrder(Left, Acc, PostLeft).
+    postOrder(Left, [Oper | Acc], PostLeft).
