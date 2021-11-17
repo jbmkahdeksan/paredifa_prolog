@@ -17,7 +17,7 @@
 
 begin_compile(Input, DFA) :-
     op(650, xfx, '==>'),
-    reset_gensym('$fa_'), reset_gensym('s'),
+    reset_gensym('s'),
     new_stack(Stack),
     postOrder(Input, Post),
     maplist(to_fa, Post, FA),

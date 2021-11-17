@@ -32,7 +32,8 @@ construct(NFA, DFA) :-
     new_stack(Stack), 
     push_stack(Stack, [S0]),   
 
-  
+    format(atom(Initial), '[~w]', [S0]),
+    fa_set_initial(DFA, Initial),
 
     fa_vocab(NFA, Vocab),
     fa_set_vocab(DFA, Vocab),
@@ -41,13 +42,12 @@ construct(NFA, DFA) :-
 
     fa_finals(NFA, NFAfinals),
     fa_states(DFA, DFAstates),
-    findall(State, (member(State, DFAstates), 
-                    member(X, State), 
-                    member(X, NFAfinals)), 
+    findall(State, (member(State, DFAstates),
+                    member(X, State),
+                    member(X, NFAfinals)),                   
                     Finals),
-    fa_set_finals(DFA, Finals),
-    format(atom(Initial), '[~w]', [S0]),
-    fa_set_initial(DFA, Initial)
+    maplist([F, S] >> atom_to_term(F, S, _), Finals, DFAfinals),
+    forall(member(F, DFAfinals), fa_set_finals(DFA, F))
 .
 
 creator(Stack, _, _) :- is_empty(Stack), !.

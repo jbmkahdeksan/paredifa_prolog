@@ -98,7 +98,7 @@ json_to_fa(JsonDict, FA) :-
         vocabulary: Vocab, 
         states: States, 
         initial: S0, 
-        finals: Finals,
+        finals: Finals, %[s1]
         moves: Moves
     } :< JsonDict,
     fa_new_id(FA),
