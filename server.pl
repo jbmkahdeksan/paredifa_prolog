@@ -42,7 +42,7 @@ serve_files(Request) :-
 serve_files(Request) :-
     http_404([], Request).  
 
-compile(Request) :-  
+compile(Request) :-         
     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
     Value = Data.value,
     begin_parse(Value, Tree),
@@ -64,7 +64,6 @@ compile(Request) :-
     % atom_json_dict(Resp, Output, []), % Resp is an Atom / Output is a Dict
 
 
-    reply_json(Output).
-
-
+    reply_json(Output)
+.
 

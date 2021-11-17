@@ -1,8 +1,12 @@
 :- module(fa, [json_to_fa/2, fa_to_json/2, 
+               fa_set_vocab/2,
                fa_new_id/1, state_new_id/1,
                fa_initial/2, fa_finals/2, 
                fa_states/2, fa_moves/2, 
-               fa_vocab/2, search_move/4]).
+               fa_vocab/2, search_move/4, 
+               fa_set_states/2, fa_set_moves/2,
+               fa_insert_move_once/4, 
+               fa_set_finals/2, fa_set_initial/2]).
 :- [opers].
 
 /*
@@ -57,7 +61,10 @@ fa_move_to_term(FA, X/S ==> Y) :-
     dyn_fa_moves(FA, X, S, Y).
 
 %%%%%%%%%%%%%%%%%%%%%% VOCAB %%%%%%%%%%%%%%%%%%%%%%%%%
-fa_set_vocab(FA, Symb) :-
+fa_set_vocab(FA, L) :-
+    forall(member(S, L), fa_set_symbol(FA, S)).
+
+fa_set_symbol(FA, Symb) :-
     fa_insert_symb_once(FA, Symb).
 
 fa_insert_symb_once(FA, Symb) :-
@@ -97,11 +104,11 @@ json_to_fa(JsonDict, FA) :-
         moves: Moves
     } :< JsonDict,
     fa_new_id(FA),
+    fa_set_vocab(FA, Vocab),
     fa_set_initial(FA, S0),
     forall(member(S, States), fa_set_states(FA, S)),
     forall(member(F, Finals), fa_set_finals(FA, F)),
-    forall(member(M, Moves), (atom_to_term(M, T, _), fa_set_moves(FA, T))),   
-    forall(member(V, Vocab), fa_set_vocab(FA, V))     
+    forall(member(M, Moves), (atom_to_term(M, T, _), fa_set_moves(FA, T)))
 . 
 
 fa_to_json(FA, JSON) :-
@@ -110,11 +117,13 @@ fa_to_json(FA, JSON) :-
     fa_states(FA, States),
     fa_vocab(FA, Vocab),
     fa_moves(FA, Moves),
+    maplist([M, Out] >> format(atom(Out),'~w',[M]), Moves, Edges),
     JSON = json{
+        id:FA,
         vocabulary: Vocab, 
         states: States, 
         initial: S0, 
         finals: Finals,
-        moves: Moves
+        moves: Edges
     }
 . 

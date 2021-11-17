@@ -15,15 +15,15 @@
 
 
 
-begin_compile(Input, NFA) :-
+begin_compile(Input, DFA) :-
     op(650, xfx, '==>'),
     reset_gensym('$fa_'), reset_gensym('s'),
     new_stack(Stack),
     postOrder(Input, Post),
     maplist(to_fa, Post, FA),
     forall(member(F, FA), fa_handler(Stack, F)),
-    pop_stack(Stack, NFA)
-    %convert(NFA, DFA)
+    pop_stack(Stack, NFA),
+    convert(NFA, DFA)
     .
 
 
