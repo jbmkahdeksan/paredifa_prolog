@@ -42,11 +42,12 @@ construct(NFA, DFA) :-
 
     fa_finals(NFA, NFAfinals),
     fa_states(DFA, DFAstates),
-    findall(State, (member(State, DFAstates),
+    maplist([State, Term] >> atom_to_term(State, Term, _), DFAstates, TermStates),
+    findall(State, (member(State, TermStates),
                     member(X, State),
                     member(X, NFAfinals)),                   
                     Finals),
-    maplist([F, S] >> atom_to_term(F, S, _), Finals, DFAfinals),
+    maplist([F, S] >> format(atom(S), '~w', [F]), Finals, DFAfinals),
     forall(member(F, DFAfinals), fa_set_finals(DFA, F))
 .
 
