@@ -31,8 +31,7 @@ construct(NFA, DFA) :-
     new_stack(Stack), 
     push_stack(Stack, [S0]),   
 
-    format(atom(Initial), '[~w]', [S0]),
-    fa_set_initial(DFA, Initial), 
+  
 
     fa_vocab(NFA, Vocab),
     fa_set_vocab(DFA, Vocab),
@@ -45,7 +44,9 @@ construct(NFA, DFA) :-
                     member(X, State), 
                     member(X, NFAfinals)), 
                     Finals),
-    fa_set_finals(DFA, Finals)
+    fa_set_finals(DFA, Finals),
+    format(atom(Initial), '[~w]', [S0]),
+    fa_set_initial(DFA, Initial)
 .
 
 creator(Stack, _, _) :- is_empty(Stack), !.
@@ -57,11 +58,10 @@ creator(Stack, DFA, NFA) :-
     fa_vocab(DFA, Vocab), 
     maplist([Y, Z] >> (finder(NFA, Y, Current, Z)), Vocab, Zs), %finds neighbors Z.
     
-    forall(member(Z, Zs), stack_handler(Stack, Z, DFA)), % conditional push z
-
-
-    maplist([Y, Z, Move] >> transformer(Current, Y, Z, Move), Vocab, Zs, Miracle), %creates moves type Current/Y ==> Z, for each Y and Z (a Zip).
-    forall(member(Move, Miracle), fa_set_moves(DFA, Move)), %assert moves 
+    forall(member(Zetita, Zs), stack_handler(Stack, DFA, Zetita)), % conditional push z
+   
+    maplist([Y, Z, Atom] >> transformer(Current, Y, Z, Atom), Vocab, Zs, Miracle), %creates moves type Current/Y ==> Z, for each Y and Z (a Zip).
+    forall(member(Atom, Miracle), (atom_to_term(Atom, T, _), fa_set_moves(DFA, T))), %assert moves 
 
     creator(Stack, DFA, NFA) %recursive call to the stack.
 .
@@ -73,16 +73,15 @@ finder(NFA, Y, Current, List) :-
 .
 
 %Transforms the Current state on stack into a Move for each Y in Vocab and for each discovered neighbor Z.
-transformer(Current, Y, Z, Move) :-
-    format(atom(Move), '~w/~w==>~w', [Current, Y, Z])
+transformer(Current, Y, Z, Atom) :-
+    format(atom(Atom), '~w/~w==>~w', [Current, Y, Z])
 .
 
-% Conditional push on stack
+%Conditional push on stack
 stack_handler(_, DFA, Z) :-
     fa_states(DFA, States), 
     format(atom(C), '~w', [Z]),
-    member(C, States), !
-.
+    member(C, States), !.
 
 stack_handler(Stack, _, Z) :-
     push_stack(Stack, Z)

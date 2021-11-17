@@ -12,8 +12,6 @@
 /*
 A model for FA using predicates
 */
-
-
 :- dynamic dyn_fa_initial/2.
 :- dynamic dyn_fa_final/2.
 :- dynamic dyn_fa_moves/4.
