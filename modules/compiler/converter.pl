@@ -42,13 +42,11 @@ construct(NFA, DFA) :-
 
     fa_finals(NFA, NFAfinals),
     fa_states(DFA, DFAstates),
-    maplist([State, Term] >> atom_to_term(State, Term, _), DFAstates, TermStates),
-    findall(State, (member(State, TermStates),
+    findall(State, (member(State, DFAstates),
                     member(X, State),
                     member(X, NFAfinals)),                   
                     Finals),
-    maplist([F, S] >> format(atom(S), '~w', [F]), Finals, DFAfinals),
-    forall(member(F, DFAfinals), fa_set_finals(DFA, F))
+    forall(member(F, Finals), fa_set_finals(DFA, F))
 .
 
 creator(Stack, _, _) :- is_empty(Stack), !.
@@ -73,10 +71,12 @@ creator(Stack, DFA, NFA) :-
 
 finder(NFA, Y, Current, List) :- 
     atom_number(Y, N),
-    findall(Z, (member(X, Current), search_move(NFA, X, N, Z)), List).
+    findall(Z, (member(X, Current), search_move(NFA, X, N, Z)), List),
+    nth0(0, List, _).
+    
 
-finder(NFA, Y, Current, List) :-
-    findall(Z, (member(X, Current), search_move(NFA, X, Y, Z)), List).
+finder(NFA, Y, Current, void) :-
+    findall(Z, (member(X, Current), search_move(NFA, X, Y, Z)), _).
 
 
 
@@ -87,8 +87,7 @@ transformer(Current, Y, Z, Current/Y==>Z).
 %Conditional push on stack
 stack_handler(_, DFA, Z) :-
     fa_states(DFA, States), 
-    format(atom(C), '~w', [Z]),
-    member(C, States), !.
+    member(Z, States), !.
 
 stack_handler(Stack, _, Z) :-
     push_stack(Stack, Z)
@@ -96,9 +95,10 @@ stack_handler(Stack, _, Z) :-
 
 %Adds a state to the DFA
 add_state(DFA, Current) :-
-    format(atom(C), '~w', [Current]),
-    fa_set_states(DFA, C)
-.    
+    fa_set_states(DFA, Current)
+.  
+
+
 
 
 

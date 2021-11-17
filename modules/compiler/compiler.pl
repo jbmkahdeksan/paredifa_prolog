@@ -4,7 +4,7 @@
 :- use_module(fa, [state_new_id/1, fa_new_id/1]).
 
 :- use_module(postorder, [postOrder/2]).
-:- use_module(to_dfa, [convert/2]).
+:- use_module(converter, [convert/2]).
 :- use_module(utils(stack), [
     new_stack/1, is_empty/1, 
     top_stack/2, push_stack/2,

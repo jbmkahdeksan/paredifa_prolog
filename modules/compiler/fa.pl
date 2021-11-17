@@ -91,6 +91,7 @@ search_move(FA, X, Y, Z) :-
     fa_moves(FA, L),
     member(X/Y==>Z, L).
 
+
 %%%%%%%%%%%%%%%%%%% TRANSFORMERS %%%%%%%%%%%%%%%%%%%%%%%%
 
 json_to_fa(JsonDict, FA) :- 
@@ -116,6 +117,8 @@ fa_to_json(FA, JSON) :-
     fa_vocab(FA, Vocab),
     fa_moves(FA, Moves),
     maplist([M, Out] >> format(atom(Out),'~w',[M]), Moves, Edges),
+    maplist([State, StateAtom] >> format(atom(StateAtom),'~w', [State]), States, DFAstates),
+    maplist([Final, FinalAtom] >> format(atom(FinalAtom),'~w', [Final]), Finals, DFAfinals),
     JSON = json{
         id:FA,
         vocabulary: Vocab, 
