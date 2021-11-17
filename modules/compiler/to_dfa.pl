@@ -16,6 +16,7 @@
 ]).
 
 
+
 convert(NFA, JSON) :-
     fa_new_id(DFA),   
 
@@ -60,22 +61,27 @@ creator(Stack, DFA, NFA) :-
     
     forall(member(Zetita, Zs), stack_handler(Stack, DFA, Zetita)), % conditional push z
    
-    maplist([Y, Z, Atom] >> transformer(Current, Y, Z, Atom), Vocab, Zs, Miracle), %creates moves type Current/Y ==> Z, for each Y and Z (a Zip).
-    forall(member(Atom, Miracle), (atom_to_term(Atom, T, _), fa_set_moves(DFA, T))), %assert moves 
+    maplist([Y, Z, Term] >> transformer(Current, Y, Z, Term), Vocab, Zs, Miracle), %creates moves type Current/Y ==> Z, for each Y and Z (a Zip).
+    forall(member(T, Miracle), (fa_set_moves(DFA, T))), %assert moves 
 
     creator(Stack, DFA, NFA) %recursive call to the stack.
 .
 
 
 %Finds neighbors for each State in stack. 
+
+finder(NFA, Y, Current, List) :- 
+    atom_number(Y, N),
+    findall(Z, (member(X, Current), search_move(NFA, X, N, Z)), List).
+
 finder(NFA, Y, Current, List) :-
-    findall(Z, (member(X, Current), search_move(NFA, X, Y, Z)), List)
-.
+    findall(Z, (member(X, Current), search_move(NFA, X, Y, Z)), List).
+
+
 
 %Transforms the Current state on stack into a Move for each Y in Vocab and for each discovered neighbor Z.
-transformer(Current, Y, Z, Atom) :-
-    format(atom(Atom), '~w/~w==>~w', [Current, Y, Z])
-.
+transformer(Current, Y, Z, Current/Y==>Z).
+
 
 %Conditional push on stack
 stack_handler(_, DFA, Z) :-
