@@ -44,6 +44,7 @@ factorRe(VPF)  --> atomRe(V),
                    {build_re_factor(V, PF, VPF)}.
                 
 atomRe(V) --> [C], {isCodeInVocabulary(C)}, {atom_codes(V, [C])}.
+%atomRe(V) --> [], {atom_codes(V, [])}.   
 
 postReFactor( +(L) )     --> "+", !, postReFactor( L ).
 postReFactor( ?(L) )     --> "?", !, postReFactor( L ). 

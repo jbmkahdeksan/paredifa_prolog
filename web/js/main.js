@@ -1,5 +1,5 @@
 
-const SERVICE_URL = 'http://localhost:9000/compiler';
+const SERVICE_URL = 'http://localhost:9000/simplifier';
 
 const binding = (btn, input, out) => {
     
@@ -11,7 +11,7 @@ const binding = (btn, input, out) => {
                 body: JSON.stringify(obj)
             })
              .then(resp => resp.json())
-             .then(json => {console.log(json);  out.innerHTML += `\n árbol: ${json.tree} --> en post-orden: ${json.trail} --> ${json.fa}\n
+             .then(json => {console.log(json);  out.innerHTML += `\n árbol: ${json.tree} 
                 FA = {
                     id: ${json.fa.id},
                     vocabulary: ${json.fa.vocabulary},

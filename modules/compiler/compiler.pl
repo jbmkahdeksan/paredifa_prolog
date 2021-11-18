@@ -4,7 +4,7 @@
 :- use_module(fa, [state_new_id/1, fa_new_id/1]).
 
 :- use_module(postorder, [postOrder/2]).
-:- use_module(converter, [convert/2]).
+:- use_module(converter, [begin_convert/2]).
 :- use_module(utils(stack), [
     new_stack/1, is_empty/1, 
     top_stack/2, push_stack/2,
@@ -23,21 +23,22 @@ begin_compile(Input, DFA) :-
     maplist(to_fa, Post, FA),
     forall(member(F, FA), fa_handler(Stack, F)),
     pop_stack(Stack, NFA),
-    convert(NFA, DFA)
-    .
+    begin_convert(NFA, DFA)
+.    
 
 
 %%%%%%%%%% MAPPER %%%%%%%%%%
 to_fa(Token, FA) :-
     isDigit(Token), !,
-    fa_atomic(Token, FA).
+    fa_atomic(Token, FA)
+. 
 
 to_fa(Token, FA) :-
     isLetter(Token), !,
-    fa_atomic(Token, FA).
+    fa_atomic(Token, FA)
+. 
 
 to_fa(Oper, Oper).
-
 
 %%%%%%%% HANDLER %%%%%%%%%%%
 fa_handler(Stack, A) :-

@@ -1,13 +1,12 @@
-:- module(to_dfa, [convert/2]).
+:- module(to_dfa, [begin_convert/2]).
 :- [opers].
 :- use_module(fa, [json_to_fa/2, fa_to_json/2, 
-                   fa_new_id/1, state_new_id/1,
-                   fa_initial/2, fa_finals/2, 
-                   fa_states/2, fa_moves/2, 
-                   fa_vocab/2, search_move/4, 
+                   fa_new_id/1,  fa_initial/2, 
+                   fa_finals/2,  fa_states/2, 
+                   fa_vocab/2,   search_move/4, 
                    fa_set_states/2, fa_set_vocab/2,
-                   fa_set_moves/2, 
-                   fa_set_finals/2, fa_set_initial/2]).
+                   fa_set_moves/2,  fa_set_finals/2, 
+                   fa_set_initial/2]).
 
 :- use_module(utils(stack), [
     new_stack/1, is_empty/1, 
@@ -17,7 +16,7 @@
 
 
 
-convert(NFA, JSON) :-
+begin_convert(NFA, JSON) :-
     fa_new_id(DFA),   
 
     json_to_fa(NFA, Obj),
@@ -60,8 +59,8 @@ creator(Stack, DFA, NFA) :-
     
     forall(member(Zetita, Zs), stack_handler(Stack, DFA, Zetita)), % conditional push z
    
-    maplist([Y, Z, Term] >> transformer(Current, Y, Z, Term), Vocab, Zs, Miracle), %creates moves type Current/Y ==> Z, for each Y and Z (a Zip).
-    forall(member(T, Miracle), (fa_set_moves(DFA, T))), %assert moves 
+    maplist([Y, Z, Term] >> transformer(Current, Y, Z, Term), Vocab, Zs, Edges), %creates moves type Current/Y ==> Z, for each Y and Z (a Zip).
+    forall(member(T, Edges), (fa_set_moves(DFA, T))), %assert moves 
 
     creator(Stack, DFA, NFA) %recursive call to the stack.
 .
@@ -72,8 +71,11 @@ creator(Stack, DFA, NFA) :-
 finder(NFA, Y, Current, List) :- 
     atom_number(Y, N),
     findall(Z, (member(X, Current), search_move(NFA, X, N, Z)), List),
-    nth0(0, List, _).
-    
+    nth0(0, List, _), !.
+
+finder(NFA, Y, Current, List) :- 
+    findall(Z, (member(X, Current), search_move(NFA, X, Y, Z)), List),
+    nth0(0, List, _), !.    
 
 finder(NFA, Y, Current, void) :-
     findall(Z, (member(X, Current), search_move(NFA, X, Y, Z)), _).

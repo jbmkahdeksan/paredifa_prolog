@@ -122,9 +122,9 @@ fa_to_json(FA, JSON) :-
     JSON = json{
         id:FA,
         vocabulary: Vocab, 
-        states: States, 
+        states: DFAstates, 
         initial: S0, 
-        finals: Finals,
+        finals: DFAfinals,
         moves: Edges
     }
 . 
