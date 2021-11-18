@@ -35,10 +35,10 @@ mime:mime_extension('js', 'application/javascript').
     atom_number(SPort, Port), 
     server(Port).
 
-:- http_handler('/compiler', compile, []).
-:- http_handler('/evaluator', evaluate, []).
-:- http_handler('/simplifier', simplify, []).
-:- http_handler('/converter', convert, []).
+:- http_handler('/compiler', compile, []).    % regex to dfa
+:- http_handler('/evaluator', evaluate, []).  % dfa/input to queue
+:- http_handler('/simplifier', simplify, []). % simplify regex to dfa
+:- http_handler('/converter', convert, []).   % nfa to dfa
 
 
 :- http_handler(web(.), serve_files, [prefix]).
@@ -61,6 +61,7 @@ compile(Request) :-
     term_to_atom(Tree, Atom),
     
     Output = json{
+        done : true,
         value: Value,
         tree:  Atom,
         fa: FA
