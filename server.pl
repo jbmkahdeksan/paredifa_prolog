@@ -82,18 +82,29 @@ simplify(Request) :-
     begin_simplify(Tree, Simp),
     begin_compile(Simp, FA),
     term_to_atom(Simp, Atom),
-    term_to_atom(Tree, Arbol),
+    %term_to_atom(Tree, Arbol),
 
     Output = json{
         done: true,
-        tree:  Arbol,
-        simplified: Atom,
+        tree:  Atom,
         fa: FA
+    },
+    
+reply_json(Output)
+. 
+
+convert(Request) :-
+    http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
+    Value = Data.value,
+    begin_convert(Value, DFA),
+    
+    Output = json{
+        done: true,
+        dfa: DFA
     },
 
     reply_json(Output)
 . 
-
 
 % evaluate(Request) :-
 %     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
@@ -112,20 +123,4 @@ simplify(Request) :-
 %     reply_json(Output)
 % . 
 
-% convert(Request) :-
-%     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
-%     Value = Data.value,
-%     begin_parse(Value, Tree),
-%     begin_simplify(Tree, Simp),
-%     %begin_compile(Simp, FA),
-%     term_to_atom(Simp, Atom),
-%     term_to_atom(Tree, Arbol),
-
-%     Output = json{
-%         tree:  Arbol,
-%         simplified: Atom
-%     },
-
-%     reply_json(Output)
-% . 
  

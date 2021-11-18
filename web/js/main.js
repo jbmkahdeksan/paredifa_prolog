@@ -1,5 +1,5 @@
 
-const SERVICE_URL = 'http://localhost:9000/compiler';
+const SERVICE_URL = 'http://localhost:9000/simplifier';
 
 const binding = (btn, input, out) => {
     
