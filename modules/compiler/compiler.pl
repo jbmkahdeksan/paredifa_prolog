@@ -164,9 +164,9 @@ fa_plus(Stack):-
     maplist([Move, Y]>>(atom_to_term(Move, _/Y==>_,_)), Pivot, Ys),
     maplist([Move, Z]>>(atom_to_term(Move, _/_==>Z,_)), Pivot, Zs),
 
-    subtract(A.finals, [A.initial], Finals),
+    %subtract(A.finals, [A.initial], Finals),
 
-    findall(Loop, (member(Y, Ys), member(Z, Zs), member(Final, Finals), 
+    findall(Loop, (member(Y, Ys), member(Z, Zs), member(Final, A.finals), 
                    format(atom(Loop),'~w/~w==>~w',[Final, Y, Z])), Loops),
 
     append(A.moves, Loops, Moves),
@@ -176,7 +176,7 @@ fa_plus(Stack):-
         id:Id,
         vocabulary: A.vocabulary,
         states: A.states,
-        initial:A.initial, finals: A.finals,
+        initial: A.initial, finals: A.finals,
         moves: MovesSet
     },
     push_stack(Stack, Plus).

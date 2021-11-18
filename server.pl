@@ -55,8 +55,6 @@ compile(Request) :-
     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
     Value = Data.value,
     begin_parse(Value, Tree),
-
-    
     begin_compile(Tree, FA),
     term_to_atom(Tree, Atom),
     
@@ -82,13 +80,15 @@ simplify(Request) :-
     Value = Data.value,
     begin_parse(Value, Tree),
     begin_simplify(Tree, Simp),
-    %begin_compile(Simp, FA),
+    begin_compile(Simp, FA),
     term_to_atom(Simp, Atom),
     term_to_atom(Tree, Arbol),
 
     Output = json{
+        done: true,
         tree:  Arbol,
-        simplified: Atom
+        simplified: Atom,
+        fa: FA
     },
 
     reply_json(Output)
