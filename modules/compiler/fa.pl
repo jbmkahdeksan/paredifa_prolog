@@ -1,5 +1,5 @@
 :- module(fa, [json_to_fa/2, fa_to_json/2, 
-               fa_set_vocab/2,
+               fa_set_vocab/2, normalize_json/2,
                fa_new_id/1, state_new_id/1,
                fa_initial/2, fa_finals/2, 
                fa_states/2, fa_moves/2, 
@@ -99,7 +99,7 @@ json_to_fa(JsonDict, FA) :-
         vocabulary: Vocab, 
         states: States, 
         initial: S0, 
-        finals: Finals, %[s1]
+        finals: Finals, 
         moves: Moves
     } :< JsonDict,
     fa_new_id(FA),
@@ -127,4 +127,22 @@ fa_to_json(FA, JSON) :-
         finals: DFAfinals,
         moves: Edges
     }
+. 
+
+normalize_json(JsonDict, Norm) :- 
+    _{ 
+        vocabulary: Vocab, 
+        states: States, 
+        initial: S0, 
+        finals: Finals, 
+        moves: Moves
+    } :< JsonDict,
+    fa_new_id(FA),
+    maplist([Symbol, Sym]>> atom_to_term(Symbol, Sym, _), Vocab, V), fa_set_vocab(FA, V),
+    atom_to_term(S0, I, _), fa_set_initial(FA, I),
+    forall(member(State, States), (atom_to_term(State, S, _), fa_set_states(FA, S))),
+    forall(member(Final, Finals), (atom_to_term(Final, F, _), fa_set_finals(FA, F))),
+    forall(member(Move, Moves),   (atom_to_term(Move, M, _), fa_set_moves(FA, M))),
+
+    fa_to_json(FA, Norm)
 . 

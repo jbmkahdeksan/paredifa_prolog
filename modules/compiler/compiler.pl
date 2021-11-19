@@ -13,6 +13,13 @@
 
 :- use_module(utils(extra_basics), [isDigit/1, isLetter/1]).
 
+%:- table fa_atomic/2.
+% :- table fa_concat/2.
+% :- table fa_union/2.
+% :- table fa_plus/2.
+% :- table fa_hook/2.
+% :- table fa_star/2.
+
 
 
 begin_compile(Input, DFA) :-

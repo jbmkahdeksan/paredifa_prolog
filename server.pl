@@ -17,11 +17,14 @@
 :- assert(file_search_path(parser, './modules/parser/')).
 :- assert(file_search_path(compiler, './modules/compiler/')).
 :- assert(file_search_path(simplifier, './modules/simplifier/')).
+:- [compiler(opers)].
+%
 
 %
 :- use_module(parser(parser), [begin_parse/2]).
 :- use_module(compiler(compiler), [begin_compile/2]).
 :- use_module(compiler(converter), [begin_convert/2]).
+:- use_module(compiler(fa), [normalize_json/2]).
 :- use_module(simplifier(simplifier), [begin_simplify/2]).
 
 :- multifile http:location/3.
@@ -51,38 +54,32 @@ serve_files(Request) :-
 serve_files(Request) :-
     http_404([], Request).  
 
-compile(Request) :-         
+compile(Request) :-    
+    %compiles without simplification     
     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
-    Value = Data.value,
-    begin_parse(Value, Tree),
+    begin_parse(Data.value, Tree),
     begin_compile(Tree, FA),
     term_to_atom(Tree, Atom),
     
     Output = json{
         done : true,
-        value: Value,
         tree:  Atom,
         fa: FA
     },
-
-    % format(atom(Resp), '{
-    %                     "done": "true",
-    %                     "tree": "~w",
-    %                     "msg": "Hello ~w"}', [Tree, you]),
-    % atom_json_dict(Resp, Output, []), % Resp is an Atom / Output is a Dict
-
+    
     reply_json(Output)
 .
 
 
 simplify(Request) :-
+     %simplifies the regex, then compiles it
     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
-    Value = Data.value,
-    begin_parse(Value, Tree),
+
+
+    begin_parse(Data.value, Tree),
     begin_simplify(Tree, Simp),
     begin_compile(Simp, FA),
     term_to_atom(Simp, Atom),
-    %term_to_atom(Tree, Arbol),
 
     Output = json{
         done: true,
@@ -94,19 +91,22 @@ reply_json(Output)
 . 
 
 convert(Request) :-
+    %converts a JSON NFA to a JSON DFA
     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
-    Value = Data.value,
-    begin_convert(Value, DFA),
     
+    normalize_json(Data.value, NFA),
+    begin_convert(NFA, DFA),
+
     Output = json{
         done: true,
-        dfa: DFA
+        fa: DFA
     },
 
     reply_json(Output)
 . 
 
 % evaluate(Request) :-
+%     %evaluates the DFA with a given input.  
 %     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
 %     Value = Data.value,
 %     begin_parse(Value, Tree),

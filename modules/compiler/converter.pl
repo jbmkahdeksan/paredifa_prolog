@@ -14,6 +14,8 @@
     size/2, pop_stack/2
 ]).
 
+% :- table finder/2.
+% :- table transformer/4.
 
 
 begin_convert(NFA, JSON) :-
@@ -71,17 +73,16 @@ creator(Stack, DFA, NFA) :-
 finder(NFA, Y, Current, Set) :- 
     atom_number(Y, N),
     findall(Z, (member(X, Current), search_move(NFA, X, N, Z)), List),
-    list_to_set(List, Set),
+    list_to_ord_set(List, Set),
     nth0(0, Set, _), !.
 
 finder(NFA, Y, Current, Set) :- 
     findall(Z, (member(X, Current), search_move(NFA, X, Y, Z)), List),
-    list_to_set(List, Set),
+    list_to_ord_set(List, Set),
     nth0(0, Set, _), !.   
 
 finder(NFA, Y, Current, void) :-
     findall(Z, (member(X, Current), search_move(NFA, X, Y, Z)), _).
-
 
 
 %Transforms the Current state on stack into a Move for each Y in Vocab and for each discovered neighbor Z.
