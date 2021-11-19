@@ -138,7 +138,9 @@ normalize_json(JsonDict, Norm) :-
         moves: Moves
     } :< JsonDict,
     fa_new_id(FA),
-    maplist([Symbol, Sym]>> atom_to_term(Symbol, Sym, _), Vocab, V), fa_set_vocab(FA, V),
+    maplist([Symbol, Sym]>> atom_to_term(Symbol, Sym, _), Vocab, V), include(number, V, Nums),
+    subtract(V, Nums, Alphabet), maplist([In, At]>>atom_number(At, In), Nums, AL), union(Alphabet, AL, AV),
+    fa_set_vocab(FA, AV),
     atom_to_term(S0, I, _), fa_set_initial(FA, I),
     forall(member(State, States), (atom_to_term(State, S, _), fa_set_states(FA, S))),
     forall(member(Final, Finals), (atom_to_term(Final, F, _), fa_set_finals(FA, F))),

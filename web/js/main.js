@@ -1,7 +1,7 @@
 
 const NFA = {
     value: {
-      vocabulary: [ 1, 0 ],
+      vocabulary: [ '1', '0' ],
       states: [ 's1', 's2' ],
       initial: 's1',
       finals: [ 's2' ],
@@ -22,6 +22,15 @@ const binding = (btn, input, out) => {
             })
              .then(resp => resp.json())
              .then(json => {console.log(json);  out.innerHTML += `\n árbol: ${json.tree} 
+
+             NFA = {
+                value: {
+                vocabulary: [ 1, 0 ],
+                states: [ 's1', 's2' ],
+                initial: 's1',
+                finals: [ 's2' ],
+                moves: [ 's1/0==>s1', 's1/1==>s1', 's2/0==>s1', 's2/1==>s1' ]
+            },
                 receiving FA = {
                             id: ${json.fa.id},
                             vocabulary: ${json.fa.vocabulary},

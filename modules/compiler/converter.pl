@@ -69,11 +69,11 @@ creator(Stack, DFA, NFA) :-
 
 
 %Finds neighbors for each State in stack. 
-finder(NFA, Y, Current, Set) :- 
-    number(Y); atom_number(N, Y),
-    findall(Z, (member(X, Current), search_move(NFA, X, N, Z)), List),
-    list_to_ord_set(List, Set),
-    nth0(0, Set, _), !.
+% finder(NFA, Y, Current, Set) :- 
+%     number(Y); atom_number(N, Y),
+%     findall(Z, (member(X, Current), search_move(NFA, X, N, Z)), List),
+%     list_to_ord_set(List, Set),
+%     nth0(0, Set, _), !.
 
 finder(NFA, Y, Current, Set) :- 
     atom_number(Y, N),
