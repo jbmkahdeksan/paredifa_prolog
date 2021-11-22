@@ -1,15 +1,15 @@
 
 const NFA = {
     value: {
-      vocabulary: [ '1', '0' ],
+      vocabulary: [ 'a', 'b' ],
       states: [ 's1', 's2' ],
       initial: 's1',
       finals: [ 's2' ],
-      moves: [ 's1/0==>s1', 's1/1==>s1', 's2/0==>s1', 's2/1==>s1' ]
+      moves: [ 's1/a==>s1', 's1/b==>s1', 's2/a==>s1', 's2/b==>s1' ]
     },
     type: 'nfa'
   }
-const SERVICE_URL = 'http://localhost:9000/converter';
+const SERVICE_URL = 'http://localhost:9000/simplifier';
 
 const binding = (btn, input, out) => {
     
@@ -18,27 +18,18 @@ const binding = (btn, input, out) => {
         fetch(SERVICE_URL, { 
                 method:'post',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(NFA)        
+                body: JSON.stringify(obj)        
             })
              .then(resp => resp.json())
              .then(json => {console.log(json);  out.innerHTML += `\n árbol: ${json.tree} 
-
-             NFA = {
-                value: {
-                vocabulary: [ 1, 0 ],
-                states: [ 's1', 's2' ],
-                initial: 's1',
-                finals: [ 's2' ],
-                moves: [ 's1/0==>s1', 's1/1==>s1', 's2/0==>s1', 's2/1==>s1' ]
-            },
-                receiving FA = {
-                            id: ${json.fa.id},
-                            vocabulary: ${json.fa.vocabulary},
-                            states: ${json.fa.states},
-                            initial: ${json.fa.initial},
-                            finals: ${json.fa.finals},                                                                        
-                            moves: ${json.fa.moves}
-                        }\n`})
+            receiving FA = {
+                id: ${json.fa.id},
+                vocabulary: ${json.fa.vocabulary},
+                states: ${json.fa.states},
+                initial: ${json.fa.initial},
+                finals: ${json.fa.finals},                                                                        
+                moves: ${json.fa.moves}
+            }\n`})
              .catch(e => out.innerHTML += `\n*** ${e} ***`)
     }
     btn.addEventListener("click", onclick)

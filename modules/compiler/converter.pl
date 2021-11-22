@@ -1,3 +1,15 @@
+/**
+ * Description:
+ * Converts a NFA into its equivalent DFA
+ * EIF400 -- Paradigmas de Programacion
+ * @since II Term - 2021
+ * @authors Team 01-10am
+ *  - Andres Alvarez Duran     117520958
+ *  - Joaquin Barrientos Monge 117440348
+ *  - Oscar Ortiz Chavarria    208260347
+ *  - David Zarate Marin       116770797
+ **/
+
 :- module(to_dfa, [begin_convert/2]).
 :- [opers].
 :- use_module(fa, [json_to_fa/2, fa_to_json/2, 
@@ -14,8 +26,8 @@
     size/2, pop_stack/2
 ]).
 
-% :- table finder/2.
-% :- table transformer/4.
+:- table finder/2 as subsumptive.
+:- table transformer/4 as subsumptive.
 
 
 begin_convert(NFA, JSON) :-
@@ -69,12 +81,6 @@ creator(Stack, DFA, NFA) :-
 
 
 %Finds neighbors for each State in stack. 
-% finder(NFA, Y, Current, Set) :- 
-%     number(Y); atom_number(N, Y),
-%     findall(Z, (member(X, Current), search_move(NFA, X, N, Z)), List),
-%     list_to_ord_set(List, Set),
-%     nth0(0, Set, _), !.
-
 finder(NFA, Y, Current, Set) :- 
     atom_number(Y, N),
     findall(Z, (member(X, Current), search_move(NFA, X, N, Z)), List),
@@ -107,9 +113,3 @@ stack_handler(Stack, _, Z) :-
 add_state(DFA, Current) :-
     fa_set_states(DFA, Current)
 .  
-
-
-
-
-
-

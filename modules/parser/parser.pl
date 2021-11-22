@@ -4,8 +4,15 @@ Assumes And (concat, ^) has greater precedence than or (|)
 Assumes vocabulary accordingly to extra_basics module.
 Grammar start no-terminal is re/3 (see below)
 original @author loriacarlos@gmail.com
-modified by @
 @since 2021
+@modified by
+EIF400 -- Paradigmas de Programacion
+ * @since II Term - 2021
+ * @authors Team 01-10am
+ *  - Andres Alvarez Duran 117520958
+ *  - Joaquin Barrientos Monge 117440348
+ *  - Oscar Ortiz Chavarria 208260347
+ *  - David Zarate Marin 116770797
 */
 
 :- module(parser, [ begin_parse/2 ]).

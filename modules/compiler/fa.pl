@@ -1,3 +1,15 @@
+/**
+ * Description:
+ * Object orietation module for an automata
+ * EIF400 -- Paradigmas de Programacion
+ * @since II Term - 2021
+ * @authors Team 01-10am
+ *  - Andres Alvarez Duran 117520958
+ *  - Joaquin Barrientos Monge 117440348
+ *  - Oscar Ortiz Chavarria 208260347
+ *  - David Zarate Marin 116770797
+ **/
+
 :- module(fa, [json_to_fa/2, fa_to_json/2, 
                fa_set_vocab/2, normalize_json/2,
                fa_new_id/1, state_new_id/1,
@@ -130,6 +142,8 @@ fa_to_json(FA, JSON) :-
 . 
 
 normalize_json(JsonDict, Norm) :- 
+    % when numbers are part of the vocabulary, Prolog treats them as numbers
+    % but the program needs them to be atoms.
     _{ 
         vocabulary: Vocab, 
         states: States, 

@@ -1,10 +1,16 @@
 /**
- * @author Joaquin Barrientos 
- * @email joaquin2899 at gmail.com
- * @since 2021
- * **/
+ * Description:
+ * Server of the program
+ * EIF400 -- Paradigmas de Programacion
+ * @since II Term - 2021
+ * @authors Team 01-10am
+ *  - Andres Alvarez Duran     117520958
+ *  - Joaquin Barrientos Monge 117440348
+ *  - Oscar Ortiz Chavarria    208260347
+ *  - David Zarate Marin       116770797
+ **/
 
-%some imports
+% some imports
 :- use_module(library(http/thread_httpd)).
 :- use_module(library(http/http_dispatch)).
 :- use_module(library(http/http_files)).
@@ -12,15 +18,14 @@
 :- use_module(library(http/json)).
 :- use_module(library(http/http_json)).
 
-%creating shortcuts to modules
+% creating shortcuts to modules
 :- assert(file_search_path(utils, './modules/utils/')).   
 :- assert(file_search_path(parser, './modules/parser/')).
 :- assert(file_search_path(compiler, './modules/compiler/')).
 :- assert(file_search_path(simplifier, './modules/simplifier/')).
-:- [compiler(opers)].
-%
 
-%
+% loading modules
+:- [compiler(opers)].
 :- use_module(parser(parser), [begin_parse/2]).
 :- use_module(compiler(compiler), [begin_compile/2]).
 :- use_module(compiler(converter), [begin_convert/2]).
@@ -38,10 +43,9 @@ mime:mime_extension('js', 'application/javascript').
     atom_number(SPort, Port), 
     server(Port).
 
-:- http_handler('/compiler', compile, []).    % regex to dfa
-:- http_handler('/evaluator', evaluate, []).  % dfa/input to queue
-:- http_handler('/simplifier', simplify, []). % simplify regex to dfa
-:- http_handler('/converter', convert, []).   % nfa to dfa
+:- http_handler('/compiler', compile, []).    % regex --> dfa
+:- http_handler('/simplifier', simplify, []). % simplify regex --> dfa
+:- http_handler('/converter', convert, []).   % nfa --> dfa
 
 
 :- http_handler(web(.), serve_files, [prefix]).
@@ -56,11 +60,10 @@ serve_files(Request) :-
 
 compile(Request) :-    
     %compiles without simplification     
-    http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
+    http_read_json_dict(Request, Data),
     begin_parse(Data.value, Tree),
     begin_compile(Tree, FA),
-    term_to_atom(Tree, Atom),
-    
+    term_to_atom(Tree, Atom),    
     Output = json{
         done : true,
         tree:  Atom,
@@ -72,55 +75,28 @@ compile(Request) :-
 
 
 simplify(Request) :-
-     %simplifies the regex, then compiles it
-    http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
-
-
+    % simplifies the regex, then compiles it
+    http_read_json_dict(Request, Data), 
     begin_parse(Data.value, Tree),
     begin_simplify(Tree, Simp),
-    begin_compile(Simp, FA),
+    time(begin_compile(Simp, FA)),
     term_to_atom(Simp, Atom),
-
     Output = json{
         done: true,
         tree:  Atom,
         fa: FA
     },
-    
-reply_json(Output)
+    reply_json(Output)
 . 
 
 convert(Request) :-
-    %converts a JSON NFA to a JSON DFA
-    http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
-    
+    % converts a JSON NFA to a JSON DFA
+    http_read_json_dict(Request, Data),     
     normalize_json(Data.value, NFA),
     begin_convert(NFA, DFA),
-
     Output = json{
         done: true,
         fa: DFA
     },
-
     reply_json(Output)
 . 
-
-% evaluate(Request) :-
-%     %evaluates the DFA with a given input.  
-%     http_read_json_dict(Request, Data), %Data is a PL-Dict / Request is a JSON
-%     Value = Data.value,
-%     begin_parse(Value, Tree),
-%     begin_simplify(Tree, Simp),
-%     %begin_compile(Simp, FA),
-%     term_to_atom(Simp, Atom),
-%     term_to_atom(Tree, Arbol),
-
-%     Output = json{
-%         tree:  Arbol,
-%         simplified: Atom
-%     },
-
-%     reply_json(Output)
-% . 
-
- 
