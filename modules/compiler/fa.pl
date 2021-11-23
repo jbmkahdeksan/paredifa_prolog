@@ -19,7 +19,6 @@
                fa_set_states/2, fa_set_moves/2,
                fa_insert_move_once/4, 
                fa_set_finals/2, fa_set_initial/2]).
-:- [opers].
 
 /*
 A model for FA using predicates

@@ -11,7 +11,6 @@
  **/
 
 :- module(to_dfa, [begin_convert/2]).
-:- [opers].
 :- use_module(fa, [json_to_fa/2, fa_to_json/2, 
                    fa_new_id/1,  fa_initial/2, 
                    fa_finals/2,  fa_states/2, 

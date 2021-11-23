@@ -25,7 +25,7 @@
 :- assert(file_search_path(simplifier, './modules/simplifier/')).
 
 % loading modules
-:- [compiler(opers)].
+:- [utils(opers)].
 :- use_module(parser(parser), [begin_parse/2]).
 :- use_module(compiler(compiler), [begin_compile/2]).
 :- use_module(compiler(converter), [begin_convert/2]).
