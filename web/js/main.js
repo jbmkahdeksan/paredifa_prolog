@@ -21,15 +21,14 @@ const binding = (btn, input, out) => {
                 body: JSON.stringify(obj)        
             })
              .then(resp => resp.json())
-             .then(json => {console.log(json);  out.innerHTML += `\n árbol: ${json.tree} 
-            receiving FA = {
-                id: ${json.fa.id},
+             .then(json => out.innerHTML += `\n regex: ${input.value}
+            fa = {
                 vocabulary: ${json.fa.vocabulary},
                 states: ${json.fa.states},
                 initial: ${json.fa.initial},
-                finals: ${json.fa.finals},                                                                        
-                moves: ${json.fa.moves}
-            }\n`})
+                finals: ${json.fa.finals},
+                moves: ${json.fa.moves},
+            }`)
              .catch(e => out.innerHTML += `\n*** ${e} ***`)
     }
     btn.addEventListener("click", onclick)

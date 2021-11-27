@@ -107,16 +107,10 @@ simplify_concat(A^ *(A), T) :- begin_simplify(+(A), T).
 simplify_concat(*(A)^ A, T) :- begin_simplify(*(A), T).
 simplify_concat(*(A)^ *(A), T) :- begin_simplify(*(A), T).
 
-simplify_concat(A^ +(A), Z) :- begin_simplify(+(A), Z).
 simplify_concat(+(A)^ A, Z) :- begin_simplify(+(A), Z).
 simplify_concat(+(A)^ +(A), Z) :- begin_simplify(+(A), Z).
 
 simplify_concat(A^ *(B), T) :-
-    A=..[^, L, R], R == B,
-    begin_simplify(L^ *(B), T)  
-. 
-
-simplify_concat(A^ +(B), T) :- 
     A=..[^, L, R], R == B,
     begin_simplify(L^ +(B), T)  
 . 

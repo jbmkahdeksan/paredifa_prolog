@@ -32,6 +32,7 @@
 :- use_module(compiler(fa), [normalize_json/2]).
 :- use_module(simplifier(simplifier), [begin_simplify/2]).
 
+
 :- multifile http:location/3.
 :- dynamic   http:location/3.
 
@@ -84,7 +85,7 @@ simplify(Request) :-
     Output = json{
         done: true,
         tree:  Atom,
-        fa: FA
+        fa: FA        
     },
     reply_json(Output)
 . 
