@@ -9,7 +9,7 @@ const NFA = {
     },
     type: 'nfa'
   }
-const SERVICE_URL = 'http://localhost:9000/compiler';
+const SERVICE_URL = 'https://stupefied-aryabhata-a7988e.netlify.app/compiler';
 
 const binding = (btn, input, out) => {
     
@@ -17,6 +17,7 @@ const binding = (btn, input, out) => {
         let obj = {value: input.value, type: "regex"}
         fetch(SERVICE_URL, { 
                 method:'post',
+                mode:'cors',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(obj)        
             })

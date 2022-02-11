@@ -17,6 +17,7 @@
 :- use_module(library(http/html_head)).
 :- use_module(library(http/json)).
 :- use_module(library(http/http_json)).
+:- use_module(library(http/http_cors)).
 
 % creating shortcuts to modules
 :- assert(file_search_path(utils, './modules/utils/')).   
@@ -38,6 +39,7 @@
 
 http:location(web, '/w', []).
 mime:mime_extension('js', 'application/javascript'). 
+:- set_setting_default(http:cors, [*]).
 
 :- initialization
     (current_prolog_flag(argv, [SPort | _]) -> true; SPort='9000'),
@@ -60,7 +62,8 @@ serve_files(Request) :-
     http_404([], Request).  
 
 compile(Request) :-    
-    %compiles without simplification     
+    %compiles without simplification   
+    cors_enable,  
     http_read_json_dict(Request, Data),
     begin_parse(Data.value, Tree),
     begin_compile(Tree, FA),
@@ -77,6 +80,7 @@ compile(Request) :-
 
 simplify(Request) :-
     % simplifies the regex, then compiles it
+    cors_enable,
     http_read_json_dict(Request, Data), 
     begin_parse(Data.value, Tree),
     begin_simplify(Tree, Simp),
@@ -92,6 +96,7 @@ simplify(Request) :-
 
 convert(Request) :-
     % converts a JSON NFA to a JSON DFA
+    cors_enable,
     http_read_json_dict(Request, Data),     
     normalize_json(Data.value, NFA),
     begin_convert(NFA, DFA),
