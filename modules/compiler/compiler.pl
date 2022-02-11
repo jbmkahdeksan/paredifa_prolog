@@ -80,6 +80,18 @@ fa_postfix(Stack, '?') :- fa_hook(Stack).
 
 
 %%%%%%%%%% Atomic Handler %%%%%%%%%%%
+fa_atomic(empty, FA) :-
+    fa_new_id(Id),
+    state_new_id(S0),                 
+    FA = fa{
+        id:Id, 
+        vocabulary: null, 
+        states:[S0], 
+        initial:S0, finals:[S0],
+        moves: null
+    }
+. 
+
 fa_atomic(Atomic, FA) :-
     fa_new_id(Id),
     state_new_id(S0),
@@ -105,11 +117,16 @@ fa_concat(Stack) :-
     subtract_initial_state(A, B, States),
     new_postInitial_moves(concat, A, B, Moves), 
 
+    (member(B.initial, B.finals) ->
+        append(A.finals, B.finals, Finals);
+        list_to_ord_set(B.finals, Finals)),
+
     Concat = concat{
-        id:Id,
+        id: Id,
         vocabulary: Vocab,
         states: States,
-        initial:A.initial, finals: B.finals,
+        initial: A.initial, 
+        finals: Finals,
         moves: Moves
     },
     push_stack(Stack, Concat)

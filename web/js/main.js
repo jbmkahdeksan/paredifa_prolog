@@ -9,7 +9,7 @@ const NFA = {
     },
     type: 'nfa'
   }
-const SERVICE_URL = 'http://localhost:9000/simplifier';
+const SERVICE_URL = 'http://localhost:9000/compiler';
 
 const binding = (btn, input, out) => {
     
@@ -27,7 +27,7 @@ const binding = (btn, input, out) => {
                 states: ${json.fa.states},
                 initial: ${json.fa.initial},
                 finals: ${json.fa.finals},
-                moves: ${json.fa.moves},
+                moves: ${json.fa.moves}
             }`)
              .catch(e => out.innerHTML += `\n*** ${e} ***`)
     }
